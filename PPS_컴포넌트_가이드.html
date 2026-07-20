@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPS 컴포넌트 가이드 v1.0</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  :root {
+    --color-paper: #fafafa;
+    --color-surface: #ffffff;
+    --color-surface-2: #f3f4f6;
+    --color-ink: #111827;
+    --color-ink-2: #374151;
+    --color-muted: #6b7280;
+    --color-line: #e5e7eb;
+    --color-line-strong: #d1d5db;
+    --color-accent: #2563eb;
+    --color-accent-hover: #1d4ed8;
+    --color-accent-soft: #eff6ff;
+    --color-danger: #dc2626;
+    --color-danger-soft: #fef2f2;
+    --color-warning: #d97706;
+    --color-success: #059669;
+    --font-body: "Pretendard", "Inter", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", Consolas, monospace;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-full: 999px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.03);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.04), 0 2px 4px rgba(0,0,0,0.03);
+    --shadow-hover: 0 16px 32px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.04);
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* 레이아웃 */
+  .page { max-width: 1100px; margin: 0 auto; padding: 48px 32px 96px; }
+
+  /* 커버 */
+  .cover {
+    border-bottom: 2px solid var(--color-ink);
+    padding-bottom: 48px;
+    margin-bottom: 64px;
+  }
+  .cover-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--color-accent); text-transform: uppercase; margin-bottom: 12px; }
+  .cover-title { font-size: 36px; font-weight: 800; letter-spacing: -0.03em; color: var(--color-ink); margin-bottom: 8px; }
+  .cover-sub { font-size: 15px; color: var(--color-muted); margin-bottom: 24px; max-width: 600px; line-height: 1.7; }
+  .cover-meta { font-size: 12px; color: var(--color-muted); font-family: var(--font-mono); }
+  .cover-palette { display: flex; gap: 8px; margin-top: 20px; }
+  .cover-swatch { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.08); }
+
+  /* TOC */
+  .toc { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px 24px; margin-bottom: 64px; padding: 24px; background: var(--color-surface); border: 1px solid var(--color-line); border-radius: var(--radius-lg); }
+  .toc-item { font-size: 12px; color: var(--color-muted); padding: 4px 0; border-bottom: 1px solid var(--color-line); }
+  .toc-item span { color: var(--color-accent); font-weight: 700; margin-right: 6px; font-family: var(--font-mono); }
+
+  /* 섹션 */
+  .section { margin-bottom: 72px; }
+  .section-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--color-line); }
+  .section-num { font-size: 11px; font-weight: 700; color: var(--color-accent); letter-spacing: 0.1em; font-family: var(--font-mono); }
+  .section-title { font-size: 20px; font-weight: 700; color: var(--color-ink); }
+  .section-desc { font-size: 13px; color: var(--color-muted); margin-top: 4px; }
+
+  .spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .spec-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .spec-card { padding: 20px; background: var(--color-surface); border: 1px solid var(--color-line); border-radius: var(--radius-lg); }
+  .spec-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--color-muted); text-transform: uppercase; margin-bottom: 12px; }
+
+  /* 01 컬러 */
+  .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .color-chip { border-radius: var(--radius-md); overflow: hidden; border: 1px solid rgba(0,0,0,0.06); }
+  .color-chip-block { height: 64px; }
+  .color-chip-info { padding: 8px 10px; background: var(--color-surface); }
+  .color-chip-name { font-size: 11px; font-weight: 600; color: var(--color-ink); }
+  .color-chip-hex { font-size: 10px; color: var(--color-muted); font-family: var(--font-mono); }
+  .color-chip-desc { font-size: 10px; color: var(--color-muted); margin-top: 2px; }
+
+  /* 02 타이포 */
+  .type-row { display: flex; align-items: baseline; gap: 24px; padding: 16px 0; border-bottom: 1px solid var(--color-line); }
+  .type-row:last-child { border-bottom: none; }
+  .type-meta { flex-shrink: 0; width: 200px; }
+  .type-meta-name { font-size: 11px; font-weight: 700; color: var(--color-muted); }
+  .type-meta-spec { font-size: 10px; color: var(--color-muted); font-family: var(--font-mono); margin-top: 2px; }
+  .type-sample { color: var(--color-ink); }
+
+  /* 03 간격/라운드 */
+  .space-row { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+  .space-bar-wrap { flex: 1; height: 8px; background: var(--color-surface-2); border-radius: 4px; overflow: hidden; }
+  .space-bar { height: 100%; background: var(--color-accent); border-radius: 4px; }
+  .space-label { font-size: 11px; color: var(--color-muted); font-family: var(--font-mono); width: 120px; }
+  .space-val { font-size: 11px; font-weight: 600; color: var(--color-ink); width: 40px; text-align: right; }
+  .radius-row { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+  .radius-chip { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .radius-box { width: 56px; height: 56px; background: var(--color-accent-soft); border: 2px solid var(--color-accent); }
+  .radius-name { font-size: 10px; font-family: var(--font-mono); color: var(--color-muted); }
+
+  /* 04 버튼 */
+  .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 16px; height: 36px; font-family: var(--font-body); font-size: 14px; font-weight: 500; border: 1px solid transparent; border-radius: var(--radius-sm); cursor: pointer; text-decoration: none; }
+  .btn-sm { height: 30px; font-size: 12px; padding: 0 12px; }
+  .btn-lg { height: 44px; font-size: 15px; padding: 0 20px; }
+  .btn-primary { background: var(--color-accent); color: #fff; }
+  .btn-secondary { background: var(--color-surface); color: var(--color-ink); border-color: var(--color-line-strong); }
+  .btn-ghost { background: transparent; color: var(--color-muted); }
+  .btn-danger { background: var(--color-danger); color: #fff; }
+  .btn-disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-rule { font-size: 12px; color: var(--color-muted); padding: 8px 12px; background: var(--color-surface-2); border-radius: var(--radius-sm); margin-top: 8px; }
+
+  /* 05 카드 */
+  .card-demo { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; transition: box-shadow 0.25s, transform 0.25s; }
+  .card-demo:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+  .card-thumb { aspect-ratio: 16/5; background: var(--color-accent-soft); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 13px; color: var(--color-accent); font-weight: 700; }
+  .card-body { padding: 16px 20px; }
+  .card-code { font-size: 11px; font-family: var(--font-mono); color: var(--color-accent); font-weight: 600; }
+  .card-title { font-size: 15px; font-weight: 600; color: var(--color-ink); margin-top: 4px; }
+
+  /* 06 배지 */
+  .badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: var(--radius-full); font-size: 11px; font-weight: 600; }
+  .badge-accent { background: var(--color-accent-soft); color: var(--color-accent); }
+  .badge-success { background: #ecfdf5; color: var(--color-success); }
+  .badge-warning { background: #fffbeb; color: var(--color-warning); }
+  .badge-danger { background: var(--color-danger-soft); color: var(--color-danger); }
+  .badge-neutral { background: var(--color-surface-2); color: var(--color-muted); }
+
+  /* 07 헤더 */
+  .header-demo { background: rgba(250,250,250,0.85); border: 1px solid var(--color-line); border-radius: var(--radius-md); overflow: hidden; }
+  .header-inner { display: flex; align-items: center; justify-content: space-between; padding: 0 24px; height: 52px; }
+  .header-logo { font-size: 14px; font-weight: 700; }
+  .header-logo .sh { color: var(--color-accent); }
+  .header-nav { display: flex; gap: 4px; }
+  .header-link { padding: 4px 12px; font-size: 13px; font-weight: 500; color: var(--color-muted); border-radius: var(--radius-sm); }
+  .header-link.active { color: var(--color-ink); font-weight: 600; }
+  .header-admin { padding: 4px 12px; font-size: 12px; color: var(--color-muted); border: 1px solid var(--color-line); border-radius: var(--radius-sm); }
+
+  /* 08 Hero */
+  .hero-demo { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: var(--radius-lg); padding: 32px; display: grid; grid-template-columns: 1fr 340px; gap: 32px; align-items: center; }
+  .hero-role { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--color-accent); text-transform: uppercase; margin-bottom: 8px; }
+  .hero-name { font-size: 32px; font-weight: 800; letter-spacing: -0.04em; color: var(--color-ink); margin-bottom: 12px; }
+  .hero-name .dot { color: var(--color-accent); }
+  .hero-tagline { font-size: 13px; font-weight: 500; color: var(--color-ink-2); line-height: 1.8; margin-bottom: 8px; }
+  .hero-desc { font-size: 12px; color: var(--color-muted); line-height: 1.7; margin-bottom: 20px; }
+  .hero-card { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-md); }
+  .hero-card-tag { display: inline-flex; font-size: 10px; font-weight: 600; color: var(--color-accent); background: var(--color-accent-soft); padding: 2px 8px; border-radius: var(--radius-full); margin-bottom: 8px; }
+  .hero-card-title { font-size: 15px; font-weight: 700; color: var(--color-ink); margin-bottom: 6px; }
+  .hero-card-desc { font-size: 12px; color: var(--color-muted); line-height: 1.6; margin-bottom: 12px; }
+  .hero-card-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; padding: 12px 0; border-top: 1px solid var(--color-line); border-bottom: 1px solid var(--color-line); margin-bottom: 12px; }
+  .hero-stat-num { font-size: 16px; font-weight: 800; color: var(--color-accent); display: block; text-align: center; }
+  .hero-stat-label { font-size: 9px; color: var(--color-muted); display: block; text-align: center; line-height: 1.4; }
+  .hero-card-link { font-size: 12px; font-weight: 600; color: var(--color-accent); }
+
+  /* 09 Case Study 카드 */
+  .case-card { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+  .case-top { padding: 16px 20px 12px; }
+  .case-tag { display: inline-flex; font-size: 10px; font-weight: 600; color: var(--color-accent); background: var(--color-accent-soft); padding: 2px 8px; border-radius: var(--radius-full); margin-bottom: 6px; }
+  .case-title { font-size: 15px; font-weight: 700; color: var(--color-ink); }
+  .case-row { display: grid; grid-template-columns: 48px 1fr; gap: 10px; padding: 10px 20px; border-top: 1px solid var(--color-line); align-items: baseline; }
+  .case-row-problem { background: #fff8f8; }
+  .case-row-result { background: #f6fdf9; }
+  .case-row-solution { background: #f8faff; }
+  .case-key { font-size: 11px; font-weight: 700; color: var(--color-muted); white-space: nowrap; }
+  .case-val { font-size: 12px; color: var(--color-ink-2); line-height: 1.6; }
+  .case-link { display: flex; justify-content: flex-end; padding: 10px 20px; font-size: 12px; font-weight: 600; color: var(--color-accent); border-top: 1px solid var(--color-line); }
+
+  /* 10 스킬 배지 */
+  .skill-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--color-surface); border: 1px solid var(--color-line); border-radius: var(--radius-full); font-size: 13px; font-weight: 500; color: var(--color-ink-2); }
+
+  /* 11 최근 목록 */
+  .recent-item { display: flex; align-items: center; gap: 16px; padding: 10px 16px; border-radius: var(--radius-md); border: 1px solid transparent; }
+  .recent-item:hover { background: var(--color-surface-2); border-color: var(--color-line); }
+  .recent-cat { font-size: 11px; font-weight: 600; color: var(--color-accent); background: var(--color-accent-soft); padding: 2px 8px; border-radius: var(--radius-full); white-space: nowrap; }
+  .recent-name { font-size: 13px; font-weight: 500; color: var(--color-ink); flex: 1; }
+  .recent-meta { font-size: 11px; color: var(--color-muted); font-family: var(--font-mono); }
+
+  /* 12 토스트 */
+  .toast { display: inline-flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--color-ink); color: #fff; border-radius: var(--radius-md); font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+  .toast-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .toast-success .toast-dot { background: #4ade80; }
+  .toast-error .toast-dot { background: #f87171; }
+
+  /* 그리드 룰 박스 */
+  .rule-box { padding: 14px 16px; background: var(--color-surface-2); border-left: 3px solid var(--color-accent); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: 12px; color: var(--color-ink-2); line-height: 1.7; }
+  .rule-box + .rule-box { margin-top: 8px; }
+  .rule-box strong { color: var(--color-ink); }
+
+  /* do/don't */
+  .do-dont { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .do-box { padding: 16px; border: 1.5px solid #bbf7d0; border-radius: var(--radius-md); background: #f0fdf4; }
+  .dont-box { padding: 16px; border: 1.5px solid #fecaca; border-radius: var(--radius-md); background: #fff5f5; }
+  .do-label { font-size: 11px; font-weight: 700; color: #15803d; margin-bottom: 8px; }
+  .dont-label { font-size: 11px; font-weight: 700; color: var(--color-danger); margin-bottom: 8px; }
+
+  /* 페이지 푸터 */
+  .guide-footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--color-line); display: flex; justify-content: space-between; align-items: center; }
+  .guide-footer-title { font-size: 13px; font-weight: 700; color: var(--color-ink); }
+  .guide-footer-meta { font-size: 11px; color: var(--color-muted); font-family: var(--font-mono); }
+
+  @media print {
+    body { background: white; }
+    .section { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 커버 -->
+  <div class="cover">
+    <div class="cover-label">Design Specification</div>
+    <div class="cover-title">PPS 컴포넌트 가이드</div>
+    <div class="cover-sub">
+      Personal Portfolio Server의 모든 컴포넌트·색상·간격이 하나의 규칙을 따르도록 만든 기준 문서입니다.<br>
+      개발 시 이 문서의 토큰과 컴포넌트 규칙을 그대로 사용하면 화면 간 정합성이 유지됩니다.
+    </div>
+    <div class="cover-meta">v1.0 · 개발 전달용 · Blue / White / Near-black</div>
+    <div class="cover-palette">
+      <div class="cover-swatch" style="background:#2563eb" title="Accent Blue"></div>
+      <div class="cover-swatch" style="background:#111827" title="Ink"></div>
+      <div class="cover-swatch" style="background:#ffffff;border:1px solid #e5e7eb" title="Surface"></div>
+      <div class="cover-swatch" style="background:#fafafa;border:1px solid #e5e7eb" title="Paper"></div>
+      <div class="cover-swatch" style="background:#6b7280" title="Muted"></div>
+      <div class="cover-swatch" style="background:#eff6ff" title="Accent Soft"></div>
+    </div>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-item"><span>01</span>컬러 토큰</div>
+    <div class="toc-item"><span>02</span>타이포그래피</div>
+    <div class="toc-item"><span>03</span>간격·라운드</div>
+    <div class="toc-item"><span>04</span>버튼</div>
+    <div class="toc-item"><span>05</span>프로젝트 카드</div>
+    <div class="toc-item"><span>06</span>상태 배지</div>
+    <div class="toc-item"><span>07</span>헤더·네비</div>
+    <div class="toc-item"><span>08</span>Hero Section</div>
+    <div class="toc-item"><span>09</span>Case Study 카드</div>
+    <div class="toc-item"><span>10</span>스킬 배지</div>
+    <div class="toc-item"><span>11</span>최근 목록</div>
+    <div class="toc-item"><span>12</span>토스트</div>
+  </div>
+
+  <!-- 01 컬러 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <div>
+        <div class="section-title">컬러 토큰</div>
+        <div class="section-desc">포인트 컬러는 Blue(#2563EB) 단일. 강조/주요 액션에만 사용하고 나머지는 뉴트럴로 정리합니다.</div>
+      </div>
+    </div>
+
+    <div class="spec-label">BRAND</div>
+    <div class="color-grid" style="margin-bottom:20px">
+      <div class="color-chip">
+        <div class="color-chip-block" style="background:#2563eb"></div>
+        <div class="color-chip-info">
+          <div class="color-chip-name">Accent Blue</div>
+          <div class="color-chip-hex">--color-accent · #2563EB</div>
+          <div class="color-chip-desc">주요 액션·강조</div>
+        </div>
+      </div>
+      <div class="color-chip">
+        <div class="color-chip-block" style="background:#1d4ed8"></div>
+        <div class="color-chip-info">
+          <div class="color-chip-name">Accent Hover</div>
+          <div class="color-chip-hex">--color-accent-hover · #1D4ED8</div>
+          <div class="color-chip-desc">hover / pressed</div>
+        </div>
+      </div>
+      <div class="color-chip">
+        <div class="color-chip-block" style="background:#111827"></div>
+        <div class="color-chip-info">
+          <div class="color-chip-name">Ink</div>
+          <div class="color-chip-hex">--color-ink · #111827</div>
+          <div class="color-chip-desc">제목·본문</div>
+        </div>
+      </div>
+      <div class="color-chip">
+        <div class="color-chip-block" style="background:#eff6ff;border:1px solid #e5e7eb"></div>
+        <div class="color-chip-info">
+          <div class="color-chip-name">Accent Soft</div>
+          <div class="color-chip-hex">--color-accent-soft · #EFF6FF</div>
+          <div class="color-chip-desc">배지·연결 배경</div>
+        </div>
+      </div>
+      <div class="color-chip">
+        <div class="color-chip-block" style="background:#ffffff;border:1px solid #e5e7eb"></div>
+        <div class="color-chip-info">
+          <div class="color-chip-name">Surface</div>
+          <div class="color-chip-hex">--color-surface · #FFFFFF</div>
+          <div class="color-chip-desc">카드·패널</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec-label">NEUTRAL</div>
+    <div class="color-grid" style="margin-bottom:20px">
+      <div class="color-chip">
+        <div class="color-chip-block" style="background:#fafafa;border:1px solid #e5e7eb"></div>
+        <div class="color-chip-info"><div class="color-chip-name">Paper</div><div class="color-chip-hex">--color-paper · #FAFAFA</div><div class="color-chip-desc">페이지 배경</div></div>
+      </div>
+      <div class="color-chip">
+        <div class="color-chip-block" style="background:#f3f4f6"></div>
+        <div class="color-chip-info"><div class="color-chip-name">Surface 2</div><div class="color-chip-hex">--color-surface-2 · #F3F4F6</div><div class="color-chip-desc">hover 배경</div></div>
+      </div>
+      <div class="color-chip">
+        <div class="color-chip-block" style="background:#374151"></div>
+        <div class="color-chip-info"><div class="color-chip-name">Ink 2</div><div class="color-chip-hex">--color-ink-2 · #374151</div><div class="color-chip-desc">보조 텍스트</div></div>
+      </div>
+      <div class="color-chip">
+        <div class="color-chip-block" style="background:#6b7280"></div>
+        <div class="color-chip-info"><div class="color-chip-name">Muted</div><div class="color-chip-hex">--color-muted · #6B7280</div><div class="color-chip-desc">캡션·메타</div></div>
+      </div>
+      <div class="color-chip">
+        <div class="color-chip-block" style="background:#e5e7eb"></div>
+        <div class="color-chip-info"><div class="color-chip-name">Line</div><div class="color-chip-hex">--color-line · #E5E7EB</div><div class="color-chip-desc">구분선·테두리</div></div>
+      </div>
+    </div>
+
+    <div class="spec-label">SEMANTIC</div>
+    <div class="color-grid">
+      <div class="color-chip">
+        <div class="color-chip-block" style="background:#dc2626"></div>
+        <div class="color-chip-info"><div class="color-chip-name">Danger</div><div class="color-chip-hex">--color-danger · #DC2626</div><div class="color-chip-desc">삭제·오류</div></div>
+      </div>
+      <div class="color-chip">
+        <div class="color-chip-block" style="background:#059669"></div>
+        <div class="color-chip-info"><div class="color-chip-name">Success</div><div class="color-chip-hex">--color-success · #059669</div><div class="color-chip-desc">성공·완료</div></div>
+      </div>
+      <div class="color-chip">
+        <div class="color-chip-block" style="background:#d97706"></div>
+        <div class="color-chip-info"><div class="color-chip-name">Warning</div><div class="color-chip-hex">--color-warning · #D97706</div><div class="color-chip-desc">경고·주의</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 타이포 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <div>
+        <div class="section-title">타이포그래피</div>
+        <div class="section-desc">본문 폰트는 Pretendard. 화면 안에서 크기는 아래 7단계만 사용합니다.</div>
+      </div>
+    </div>
+    <div style="background:var(--color-surface);border:1px solid var(--color-line);border-radius:var(--radius-lg);padding:24px;">
+      <div class="type-row">
+        <div class="type-meta"><div class="type-meta-name">3XL · Hero 제목</div><div class="type-meta-spec">--text-3xl · 2.25rem / 800 / -0.04em</div></div>
+        <div class="type-sample" style="font-size:2.25rem;font-weight:800;letter-spacing:-0.04em">남석훈.</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><div class="type-meta-name">2XL · 섹션 제목</div><div class="type-meta-spec">--text-2xl · 1.75rem / 700</div></div>
+        <div class="type-sample" style="font-size:1.75rem;font-weight:700">대표 프로젝트</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><div class="type-meta-name">XL · 카드 제목</div><div class="type-meta-spec">--text-xl · 1.375rem / 700</div></div>
+        <div class="type-sample" style="font-size:1.375rem;font-weight:700">Hiyo Manager</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><div class="type-meta-name">LG · 카드 제목(소)</div><div class="type-meta-spec">--text-lg · 1.125rem / 600</div></div>
+        <div class="type-sample" style="font-size:1.125rem;font-weight:600">체크리스트 표준화</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><div class="type-meta-name">BASE · 본문</div><div class="type-meta-spec">--text-base · 1rem / 400</div></div>
+        <div class="type-sample" style="font-size:1rem;font-weight:400;color:var(--color-ink-2)">기술지원 조직에서 발생하는 문제를 발견하고 개선합니다.</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><div class="type-meta-name">SM · 보조 텍스트</div><div class="type-meta-spec">--text-sm · 0.875rem / 400</div></div>
+        <div class="type-sample" style="font-size:0.875rem;color:var(--color-muted)">PRG 카테고리 · 2026년</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><div class="type-meta-name">XS · 캡션·라벨</div><div class="type-meta-spec">--text-xs · 0.75rem / 600</div></div>
+        <div class="type-sample" style="font-size:0.75rem;font-weight:600;color:var(--color-muted);letter-spacing:0.1em;text-transform:uppercase">TECHNICAL SUPPORT LEAD</div>
+      </div>
+    </div>
+    <div class="rule-box" style="margin-top:16px">
+      <strong>모노스페이스(--font-mono)</strong>는 등록번호(PRG-2026-001), 날짜(2026.07.03), 코드 등 고정폭이 필요한 데이터에만 사용합니다. JetBrains Mono / Consolas.
+    </div>
+  </div>
+
+  <!-- 03 간격·라운드 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <div>
+        <div class="section-title">간격 · 라운드 · 그림자</div>
+        <div class="section-desc">간격은 8px 배수 원칙. 라운드는 sm(6) · md(10) · lg(16) · full 4단계만 사용합니다.</div>
+      </div>
+    </div>
+    <div class="spec-grid">
+      <div class="spec-card">
+        <div class="spec-label">SPACING (8px 배수)</div>
+        <div class="space-row"><span class="space-label">--space-1</span><div class="space-bar-wrap"><div class="space-bar" style="width:4%"></div></div><span class="space-val">4px</span></div>
+        <div class="space-row"><span class="space-label">--space-2</span><div class="space-bar-wrap"><div class="space-bar" style="width:8%"></div></div><span class="space-val">8px</span></div>
+        <div class="space-row"><span class="space-label">--space-3</span><div class="space-bar-wrap"><div class="space-bar" style="width:12%"></div></div><span class="space-val">12px</span></div>
+        <div class="space-row"><span class="space-label">--space-4</span><div class="space-bar-wrap"><div class="space-bar" style="width:16%"></div></div><span class="space-val">16px</span></div>
+        <div class="space-row"><span class="space-label">--space-5</span><div class="space-bar-wrap"><div class="space-bar" style="width:24%"></div></div><span class="space-val">24px</span></div>
+        <div class="space-row"><span class="space-label">--space-6</span><div class="space-bar-wrap"><div class="space-bar" style="width:32%"></div></div><span class="space-val">32px</span></div>
+        <div class="space-row"><span class="space-label">--space-7</span><div class="space-bar-wrap"><div class="space-bar" style="width:48%"></div></div><span class="space-val">48px</span></div>
+        <div class="space-row"><span class="space-label">--space-8</span><div class="space-bar-wrap"><div class="space-bar" style="width:64%"></div></div><span class="space-val">64px</span></div>
+      </div>
+      <div class="spec-card">
+        <div class="spec-label">RADIUS</div>
+        <div class="radius-row" style="margin-bottom:24px">
+          <div class="radius-chip"><div class="radius-box" style="border-radius:6px"></div><div class="radius-name">sm · 6px<br>버튼·배지</div></div>
+          <div class="radius-chip"><div class="radius-box" style="border-radius:10px"></div><div class="radius-name">md · 10px<br>입력·항목</div></div>
+          <div class="radius-chip"><div class="radius-box" style="border-radius:16px"></div><div class="radius-name">lg · 16px<br>카드·모달</div></div>
+          <div class="radius-chip"><div class="radius-box" style="border-radius:999px;width:56px;height:28px"></div><div class="radius-name">full · 999px<br>뱃지·칩</div></div>
+        </div>
+        <div class="spec-label">SHADOW</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="padding:12px 16px;background:#fff;border-radius:var(--radius-md);box-shadow:var(--shadow-sm);font-size:11px;color:var(--color-muted)">--shadow-sm · 기본 카드</div>
+          <div style="padding:12px 16px;background:#fff;border-radius:var(--radius-md);box-shadow:var(--shadow-md);font-size:11px;color:var(--color-muted)">--shadow-md · Hero 카드</div>
+          <div style="padding:12px 16px;background:#fff;border-radius:var(--radius-md);box-shadow:var(--shadow-hover);font-size:11px;color:var(--color-muted)">--shadow-hover · hover 상태</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 버튼 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <div>
+        <div class="section-title">버튼</div>
+        <div class="section-desc">한 화면의 주요 액션(Primary)은 하나만. 나머지는 Secondary/Ghost로. 라운드 6px.</div>
+      </div>
+    </div>
+    <div class="spec-card" style="margin-bottom:16px">
+      <div class="spec-label">유형</div>
+      <div class="btn-row">
+        <a class="btn btn-primary">저장</a>
+        <a class="btn btn-secondary">취소</a>
+        <a class="btn btn-ghost">닫기</a>
+        <a class="btn btn-danger">삭제</a>
+        <a class="btn btn-primary btn-disabled">비활성</a>
+      </div>
+      <div class="spec-label" style="margin-top:20px">크기</div>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-sm">Small 30</a>
+        <a class="btn btn-primary">Default 36</a>
+        <a class="btn btn-primary btn-lg">Large 44</a>
+      </div>
+    </div>
+    <div class="do-dont">
+      <div class="do-box">
+        <div class="do-label">✓ DO</div>
+        <div class="btn-row" style="justify-content:flex-end">
+          <a class="btn btn-secondary" style="font-size:13px">취소</a>
+          <a class="btn btn-primary" style="font-size:13px">저장</a>
+        </div>
+        <div style="font-size:11px;color:#15803d;margin-top:8px">주요 액션 1개 + 취소는 우측 정렬, 저장이 가장 오른쪽.</div>
+      </div>
+      <div class="dont-box">
+        <div class="dont-label">✕ DON'T</div>
+        <div class="btn-row">
+          <a class="btn btn-primary" style="font-size:13px">저장</a>
+          <a class="btn btn-primary" style="background:#059669;font-size:13px">확인</a>
+          <a class="btn btn-primary" style="background:#d97706;font-size:13px">전송</a>
+        </div>
+        <div style="font-size:11px;color:var(--color-danger);margin-top:8px">주요 버튼 남발·색 제각각·과한 라운드 금지.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 프로젝트 카드 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <div>
+        <div class="section-title">프로젝트 카드 (ProjectCard)</div>
+        <div class="section-desc">카테고리 목록 페이지에서 사용. 썸네일 16:5 비율, 라운드 16px, hover 시 translateY(-3px).</div>
+      </div>
+    </div>
+    <div class="spec-grid-3">
+      <div class="card-demo">
+        <div class="card-thumb">PRG</div>
+        <div class="card-body">
+          <div class="card-code">PRG-2026-001</div>
+          <div class="card-title">Hiyo (프로그램 점검 툴)</div>
+        </div>
+      </div>
+      <div class="card-demo">
+        <div class="card-thumb">EDU</div>
+        <div class="card-body">
+          <div class="card-code">EDU-2026-002</div>
+          <div class="card-title">프린터 점유</div>
+        </div>
+      </div>
+      <div class="card-demo">
+        <div class="card-thumb">STA</div>
+        <div class="card-body">
+          <div class="card-code">STA-2026-001</div>
+          <div class="card-title">직원 관리</div>
+        </div>
+      </div>
+    </div>
+    <div class="rule-box" style="margin-top:16px">
+      <strong>썸네일:</strong> aspect-ratio 16/5 · object-fit cover · hover 시 scale(1.03)<br>
+      <strong>등록번호:</strong> font-mono · accent 컬러 · font-size xs<br>
+      <strong>제목:</strong> font-size base · font-weight 600 · 최대 2줄 clamp
+    </div>
+  </div>
+
+  <!-- 06 상태 배지 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <div>
+        <div class="section-title">배지 (Badge)</div>
+        <div class="section-desc">카테고리·상태 표시용. 연한 배경 + 진한 글자, 라운드 full(999px).</div>
+      </div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-label">카테고리 배지</div>
+      <div class="badge-row" style="margin-bottom:20px">
+        <span class="badge badge-accent">프로그램</span>
+        <span class="badge badge-accent">교육자료</span>
+        <span class="badge badge-accent">통계자료</span>
+        <span class="badge badge-accent">대표 프로젝트</span>
+        <span class="badge badge-accent">Hero 고정</span>
+      </div>
+      <div class="spec-label">시맨틱 배지</div>
+      <div class="badge-row">
+        <span class="badge badge-success">공개</span>
+        <span class="badge badge-neutral">비공개</span>
+        <span class="badge badge-warning">검토중</span>
+        <span class="badge badge-danger">비공개</span>
+      </div>
+    </div>
+    <div class="rule-box" style="margin-top:12px">
+      <strong>구조:</strong> background accent-soft + color accent · padding 2px 10px · border-radius full · font-size xs · font-weight 600
+    </div>
+  </div>
+
+  <!-- 07 헤더 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <div>
+        <div class="section-title">글로벌 헤더 (Header)</div>
+        <div class="section-desc">sticky top. 반투명 blur 효과. 높이 52px. 모바일에서 햄버거 메뉴로 전환.</div>
+      </div>
+    </div>
+    <div class="header-demo">
+      <div class="header-inner">
+        <div class="header-logo"><span class="sh">SH</span>Portfolio</div>
+        <div class="header-nav">
+          <div class="header-link active">Dashboard</div>
+          <div class="header-link">Projects</div>
+          <div class="header-link">Education</div>
+          <div class="header-link">Statistics</div>
+          <div class="header-link">GitHub ↗</div>
+        </div>
+        <div class="header-admin">Admin</div>
+      </div>
+    </div>
+    <div class="rule-box" style="margin-top:16px">
+      <strong>배경:</strong> rgba(250,250,250,0.85) + backdrop-filter blur(12px)<br>
+      <strong>로고:</strong> "SH" = accent blue · "Portfolio" = ink · font-weight 700<br>
+      <strong>네비 링크:</strong> 기본 muted · hover = surface-2 배경 + ink 색 · active = ink + font-weight 600<br>
+      <strong>Admin 버튼:</strong> border 1px line · hover = surface-2<br>
+      <strong>모바일(≤768px):</strong> 네비 숨김 · 햄버거 버튼 표시 · 드롭다운 메뉴
+    </div>
+  </div>
+
+  <!-- 08 Hero -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <div>
+        <div class="section-title">Hero Section</div>
+        <div class="section-desc">대시보드 최상단. 좌: 소개 텍스트 / 우: Hero 고정 프로젝트 카드. 1024px 이하에서 단열.</div>
+      </div>
+    </div>
+    <div class="hero-demo">
+      <div>
+        <div class="hero-role">Technical Support Lead</div>
+        <div class="hero-name">남석훈<span class="dot">.</span></div>
+        <div class="hero-tagline">기술지원 프로세스를 개선하고<br>업무를 자동화하며<br>상담사의 문제 해결 역량을 향상시키는<br>기술지원 실장입니다.</div>
+        <div class="hero-desc">고객센터 기술지원 조직에서 발생하는 문제를 발견하고, 교육자료·자동화 프로그램·프로세스 개선을 통해 실질적인 업무 성과를 만들어냅니다.</div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-tag">대표 프로젝트</div>
+        <div class="hero-card-title">Hiyo Manager</div>
+        <div class="hero-card-desc">HiOrder POS 환경의 점검 항목을 자동화한 Windows GUI 프로그램.</div>
+        <div class="hero-card-stats">
+          <div><span class="hero-stat-num">10x</span><span class="hero-stat-label">점검 속도</span></div>
+          <div><span class="hero-stat-num">↓</span><span class="hero-stat-label">이관 감소</span></div>
+          <div><span class="hero-stat-num">100%</span><span class="hero-stat-label">표준화</span></div>
+        </div>
+        <div class="hero-card-link">자세히 보기 →</div>
+      </div>
+    </div>
+    <div class="rule-box" style="margin-top:16px">
+      <strong>Hero 카드 데이터:</strong> isHero: true 로 선정된 프로젝트가 우측에 표시됨 (useFeatured → useHero 훅)<br>
+      <strong>그리드:</strong> grid-template-columns: 1fr 420px · gap 48px · 1024px 이하 단열
+    </div>
+  </div>
+
+  <!-- 09 Case Study 카드 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <div>
+        <div class="section-title">Case Study 카드</div>
+        <div class="section-desc">대표 프로젝트 섹션. isFeatured: true 인 프로젝트가 3열 그리드로 표시. 문제→성과→설명 구조.</div>
+      </div>
+    </div>
+    <div class="spec-grid-3">
+      <div class="case-card">
+        <div class="case-top">
+          <div class="case-tag">교육자료</div>
+          <div class="case-title">체크리스트 표준화</div>
+          <div style="font-size:11px;color:var(--color-muted);font-family:var(--font-mono);margin-top:4px">EDU-2026-003</div>
+        </div>
+        <div class="case-row case-row-problem">
+          <div class="case-key">🔴 목적</div>
+          <div class="case-val">표준화된 점검 양식 마련</div>
+        </div>
+        <div class="case-row case-row-result">
+          <div class="case-key">🟢 성과</div>
+          <div class="case-val">자체 처리율 향상, 이관 건수 감소</div>
+        </div>
+        <div class="case-row case-row-solution">
+          <div class="case-key">🔵 설명</div>
+          <div class="case-val">점검 프로세스 구축으로 업무 역량 강화</div>
+        </div>
+        <div class="case-link">자세히 보기 →</div>
+      </div>
+      <div class="case-card">
+        <div class="case-top">
+          <div class="case-tag">프로그램</div>
+          <div class="case-title">Hiyo Manager</div>
+          <div style="font-size:11px;color:var(--color-muted);font-family:var(--font-mono);margin-top:4px">PRG-2026-001</div>
+        </div>
+        <div class="case-row case-row-problem">
+          <div class="case-key">🔴 목적</div>
+          <div class="case-val">원격 점검 자동화</div>
+        </div>
+        <div class="case-row case-row-result">
+          <div class="case-key">🟢 성과</div>
+          <div class="case-val">10분→1분 단축, AHT 30분 감소</div>
+        </div>
+        <div class="case-row case-row-solution">
+          <div class="case-key">🔵 설명</div>
+          <div class="case-val">이관 반복으로 응대율 하락 → 개선</div>
+        </div>
+        <div class="case-link">자세히 보기 →</div>
+      </div>
+      <div class="case-card" style="opacity:0.4">
+        <div class="case-top">
+          <div class="case-tag">통계자료</div>
+          <div class="case-title">3번째 대표 프로젝트</div>
+          <div style="font-size:11px;color:var(--color-muted);font-family:var(--font-mono);margin-top:4px">STA-2026-001</div>
+        </div>
+        <div class="case-row case-row-problem"><div class="case-key">🔴 목적</div><div class="case-val">관리자에서 선정</div></div>
+        <div class="case-row case-row-result"><div class="case-key">🟢 성과</div><div class="case-val">—</div></div>
+        <div class="case-row case-row-solution"><div class="case-key">🔵 설명</div><div class="case-val">—</div></div>
+        <div class="case-link">자세히 보기 →</div>
+      </div>
+    </div>
+    <div class="rule-box" style="margin-top:16px">
+      <strong>행 배경:</strong> 목적 #fff8f8 · 성과 #f6fdf9 · 설명 #f8faff (색으로 구분)<br>
+      <strong>요약 필드:</strong> reasonSummary · resultSummary · descSummary (없으면 원본 첫 줄 fallback)<br>
+      <strong>최대 3개</strong>까지 표시 (getFeaturedProjects limit 3)
+    </div>
+  </div>
+
+  <!-- 10 스킬 배지 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <div>
+        <div class="section-title">핵심 역량 배지 (Skill Badge)</div>
+        <div class="section-desc">Hero 아래 핵심 역량 표시. 가로 스크롤 배지 형태. border-radius full.</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;padding:20px;background:var(--color-surface);border:1px solid var(--color-line);border-radius:var(--radius-lg)">
+      <span class="skill-badge">⚙️ 업무 자동화</span>
+      <span class="skill-badge">🔧 기술지원 표준화</span>
+      <span class="skill-badge">📋 교육자료 제작</span>
+      <span class="skill-badge">🔄 프로세스 개선</span>
+    </div>
+    <div class="rule-box" style="margin-top:12px">
+      <strong>구조:</strong> background surface · border 1px line · border-radius full · font-size sm · font-weight 500 · color ink-2
+    </div>
+  </div>
+
+  <!-- 11 최근 목록 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">11</span>
+      <div>
+        <div class="section-title">최근 목록 (RecentList)</div>
+        <div class="section-desc">최신 프로젝트 5개 표시. 클릭 가능한 행 형태. hover 시 surface-2 배경.</div>
+      </div>
+    </div>
+    <div style="background:var(--color-surface);border:1px solid var(--color-line);border-radius:var(--radius-lg);padding:20px">
+      <div style="font-size:15px;font-weight:600;margin-bottom:16px">최근 등록</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="recent-item">
+          <span class="recent-cat">교육자료</span>
+          <span class="recent-name">체크리스트</span>
+          <span class="recent-meta">EDU-2026-003</span>
+          <span class="recent-meta" style="margin-left:16px">2026.07.06</span>
+          <span style="color:var(--color-muted);font-size:14px">›</span>
+        </div>
+        <div class="recent-item">
+          <span class="recent-cat">프로그램</span>
+          <span class="recent-name">자동공지</span>
+          <span class="recent-meta">PRG-2026-002</span>
+          <span class="recent-meta" style="margin-left:16px">2026.07.06</span>
+          <span style="color:var(--color-muted);font-size:14px">›</span>
+        </div>
+        <div class="recent-item">
+          <span class="recent-cat">통계자료</span>
+          <span class="recent-name">직원 관리</span>
+          <span class="recent-meta">STA-2026-002</span>
+          <span class="recent-meta" style="margin-left:16px">2026.07.06</span>
+          <span style="color:var(--color-muted);font-size:14px">›</span>
+        </div>
+      </div>
+    </div>
+    <div class="rule-box" style="margin-top:12px">
+      <strong>행:</strong> grid-template-columns auto 1fr auto auto · gap 16px · hover = surface-2 + border line<br>
+      <strong>화살표:</strong> hover 시 translateX(2px) · color ink
+    </div>
+  </div>
+
+  <!-- 12 토스트 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">12</span>
+      <div>
+        <div class="section-title">토스트 알림 (Toast)</div>
+        <div class="section-desc">화면 우하단 고정. 3초 노출. 다크 배경 + 컬러 도트. 라운드 10px.</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;padding:20px;background:var(--color-surface-2);border-radius:var(--radius-lg)">
+      <div class="toast toast-success">
+        <div class="toast-dot"></div>
+        <span>등록했습니다</span>
+      </div>
+      <div class="toast toast-error">
+        <div class="toast-dot"></div>
+        <span>저장에 실패했습니다</span>
+      </div>
+    </div>
+    <div class="rule-box" style="margin-top:12px">
+      <strong>위치:</strong> position fixed · bottom 24px · right 24px · z-index 1100<br>
+      <strong>배경:</strong> --color-ink (#111827) · 텍스트 white · 도트 컬러로 유형 구분<br>
+      <strong>성공:</strong> #4ade80 도트 · <strong>에러:</strong> #f87171 도트
+    </div>
+  </div>
+
+  <!-- 푸터 -->
+  <div class="guide-footer">
+    <div>
+      <div class="guide-footer-title">PPS 컴포넌트 가이드</div>
+      <div class="guide-footer-meta" style="margin-top:4px">Primary #2563EB · Ink #111827 · Surface #FFFFFF · Paper #FAFAFA</div>
+    </div>
+    <div class="guide-footer-meta">v1.0 · 개발 전달용 · Pretendard</div>
+  </div>
+
+</div>
+</body>
+</html>
